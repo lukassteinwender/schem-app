@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+    <head>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-176109454-1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'UA-176109454-1');
+        </script>
+        
+        <title>Convert .Schem to .Schematic</title>
+        
+        <!-- https://github.com/kpanuragh/zlib -->
+        <script src="zlib.js"></script>
+        
+        <!-- https://github.com/sjmulder/nbt-js -->
+        <script src="nbt.js"></script>
+        
+        <script src="schemtoschematic.js"></script>
+        
+        <script>
+            function uploadFile(file) {
+                console.log('Processing ' + file.name);
+                var fr = new FileReader();
+                fr.onload = function() {
+                    schemtoschematic(fr.result, function(data) {                        
+                        var name = file.name;
+                    
+                        if (~name.lastIndexOf('.')) {
+                            name = name.substr(0, name.lastIndexOf('.'));
+                        }
+                    
+                        name += '.schematic';
+                    
+                        var blob = new Blob([data], {type: 'application/nbt'});
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = name;
+                        link.innerHTML = 'Download ' + name;
+                        link.click();
+                        var li = document.createElement('li');
+                        li.appendChild(link);
+                        document.querySelector('#downloads').appendChild(li);
+                    });
+                };
+                fr.readAsArrayBuffer(file);
+            }
+            
+            function upload(input) {
+                for (var i = 0; i < input.files.length; i++) {
+                    uploadFile(input.files[i]);
+                }
+            }
+        </script>
+        
+        <style>
+            * {
+                font-family: Arial, sans-serif;
+            }
+            
+            html {
+                height: 100%;
+            }
+            
+            body {
+                background: #ddd;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            
+            section {
+                background: white;
+                box-shadow: 0 0 5px #aaa;
+                height: 100%;
+                margin: auto;
+                width: 600px;
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <section>
+            <h1>Convert .schem files to .schematic files</h1>
+            <p>Convert the new worledit 1.13+ .schem files to the legacy .schematic files</p>
+            <label for="file">Upload your .schem file here</label>: <input id="file" type="file" onchange="upload(this)" multiple/><br/>
+            <small>Privacy notice: All schematics uploaded stay on your local machine and aren't processed by any server</small>
+            <ul id="downloads"></ul>
+            <p id="error"></p>
+        </scetion>
+    </body>
+</html>
