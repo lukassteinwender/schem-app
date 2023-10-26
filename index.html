@@ -1,8 +1,7 @@
 <!doctype html>
+
 <html>
     <head>
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-176109454-1"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -13,6 +12,8 @@
         
         <title>Convert .Schem to .Schematic</title>
         
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
         <!-- https://github.com/kpanuragh/zlib -->
         <script src="zlib.js"></script>
         
@@ -40,6 +41,7 @@
                         link.href = window.URL.createObjectURL(blob);
                         link.download = name;
                         link.innerHTML = 'Download ' + name;
+                        link.style.color = 'white';
                         link.click();
                         var li = document.createElement('li');
                         li.appendChild(link);
@@ -54,8 +56,40 @@
                     uploadFile(input.files[i]);
                 }
             }
+
+            function dropHandler(ev) {
+                console.log("File(s) dropped");
+
+                // Prevent default behavior (Prevent file from being opened)
+                ev.preventDefault();
+                if (ev.dataTransfer.items) {
+                    // Use DataTransferItemList interface to access the file(s)
+                    [...ev.dataTransfer.items].forEach((item, i) => {
+                        // If dropped items aren't files, reject them
+                        if (item.kind === "file") {
+                            const file = item.getAsFile();
+                            console.log(`… file[${i}].name = ${file.name}`);
+                            uploadFile(file);
+                        }
+                        
+                    });
+                } else {
+                    // Use DataTransfer interface to access the file(s)
+                    [...ev.dataTransfer.files].forEach((file, i) => {
+                        console.log(`… file[${i}].name = ${file.name}`);
+                        uploadFile(file);
+                    });
+                    
+                }            
+            }
+
+            function dragOverHandler(ev) {
+                console.log("File(s) in drop zone");
+                // Prevent default behavior (Prevent file from being opened)
+                ev.preventDefault();
+            }
         </script>
-        
+
         <style>
             * {
                 font-family: Arial, sans-serif;
@@ -66,7 +100,7 @@
             }
             
             body {
-                background: #ddd;
+                background: #1e2124;
                 height: 100%;
                 margin: 0;
                 padding: 0;
@@ -75,26 +109,74 @@
             
             section {
                 background: #1e2124;
-                box-shadow: 0 0 5px #aaa;
-                height: 100%;
+                height: 90%;
                 margin: auto;
-                width: 100%;
+                width: 90%;
                 padding: 25px;
             }
             
             h1 {
-                font-size: 20px;
+                font-size: 40px;
+            }
+
+            #dropzone {
+                border: 5px solid white;
+                width: 100%;
+                height: 100%;
+                width: 80%;
+                height: 70%;
+                margin: auto;
+                
+            }
+
+            input::file-selector-button {
+                font-family: Arial, sans-serif;
+                color: white;
+                padding: 0.5em;
+                background-color: transparent;
+                border: thin solid white;
+                border-radius: 3px;
+            }
+
+
+            .dropfont {
+                font-size: 40px;
+                padding-top: 200px;
+            }
+
+            input[type='file'] {
+                color: transparent;
+            }
+            li{
+                list-style-type: none;
             }
         </style>
     </head>
+
     <body align="center">
         <section>
-            <h1>Convert .schem files to .schematic files</h1>
-            <p>Convert the new worledit 1.13+ .schem files to the legacy .schematic files</p>
-            <label for="file">Upload your .schem file here</label>: <input id="file" type="file" onchange="upload(this)" multiple/><br/>
-            <small>Privacy notice: All schematics uploaded stay on your local machine and aren't processed by any server</small>
+            <img src="logo.png">
+            <p>Convert the new worledit 1.13+ <b>.schem</b> files to the legacy <b>.schematic</b> files</p>
             <ul id="downloads"></ul>
-            <p id="error"></p>
+            <!--<p id="error"></p>-->
         </scetion>
+        <div id="dropzone" class="dropzone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+            <p class="dropfont">Drop your .schem-files here </p>
+        </div>
+        <p>or <label for="file">upload it here</label>: <input id="file" type="file" title=" " onchange="upload(this)" multiple/></p>
+        <script>
+            $('#dropzone').on('dragover', function() {
+                $(this)
+                    .css({'background-color' : 'rgba(255,255,255,0.3)'})
+            });
+            $('#dropzone').on('dragleave', function() {
+                $(this)
+                    .css({'background-color' : 'transparent'})
+            });
+            $('#dropzone').on('drop', function() {
+                $(this)
+                    .css({'background-color' : 'transparent'})
+            });
+        </script>
     </body>
 </html>
